@@ -3,12 +3,12 @@ class Node:
         self.dado = dado
         self.distancia = None
         self.proximo = None
-        self.predecessor = None
 
 class HeaderList:
     def __init__(self, identificador, tipo = "caminho"):
         self.identificador = identificador
         self.tipo = tipo
+        self.distancia = 0
         self.proximo = None
 
 class Lista:
@@ -60,10 +60,79 @@ class Lista:
 class graph:
     def __init__(self, Lista: Lista):
         self.lista = Lista
+        self.alcancados = []
+        self.computados = []
 
-    def BuscaLargura(self):
-        print(lista.AcharHeaderTipo("saida"))
+    def VerificarComputado(self, v1):
+        for x in self.computados:
+            if v1 == x: return True
+        return False
+
+    def VerificarAlcancados(self, v1):
+        for x in self.alcancados:
+            if v1 == x: return True
+        return False
         
+    def AdicionarListaVisitados(self, header: HeaderList):
+        if not self.VerificarAlcancados(header.identificador):
+            self.alcancados.append(header.identificador)
+        #adiciona o header que esta sendo lido como computado
+        self.computados.append(header.identificador)
+        #print(header.identificador+"\n")
+
+        #adiciona todos os nos que nao foram computados ainda na fila de alcancados
+        aux_no = header.proximo
+        while aux_no != None:
+            if not self.VerificarComputado(aux_no.dado):
+                self.alcancados.append(aux_no.dado)
+
+                pos_Noalcancado = self.lista.PosicaoHeader(aux_no.dado)
+                self.lista.vertices[pos_Noalcancado].distancia = (header.distancia+1)
+                #print(self.lista.vertices[pos_Noalcancado].distancia)
+
+            aux_no = aux_no.proximo
+        
+        self.alcancados.pop(0)
+
+
+    def DistanciaEntradaSaida(self):
+        entrada = lista.AcharHeaderTipo("entrada")
+
+        #print("iteracao 1")
+        entrada_pos = lista.PosicaoHeader(entrada)
+        self.AdicionarListaVisitados(lista.vertices[entrada_pos])
+
+        contador = 2
+        while len(self.alcancados) > 0:
+            #print(f"iteracao {contador}")
+            entrada_pos = lista.PosicaoHeader(self.alcancados[0])
+            self.AdicionarListaVisitados(lista.vertices[entrada_pos])
+            contador = contador +1
+
+        distancia1 = lista.vertices[lista.PosicaoHeader("*")].distancia
+
+        #limpando os arrays
+        self.alcancados.clear()
+        self.computados.clear()
+
+        #limpando as distancias
+        for x in self.lista.vertices:
+            x.distancia = 0
+
+        obejetivo_pos = self.lista.PosicaoHeader("*")
+        self.AdicionarListaVisitados(lista.vertices[obejetivo_pos])
+        
+        contador = 2
+        while len(self.alcancados) > 0:
+            #print(f"iteracao {contador}")
+            entrada_pos = lista.PosicaoHeader(self.alcancados[0])
+            self.AdicionarListaVisitados(lista.vertices[entrada_pos])
+            contador = contador +1
+
+        distancia2 = lista.vertices[lista.PosicaoHeader("d")].distancia
+
+        print(distancia1 + distancia2)
+
 
 
 
@@ -71,12 +140,13 @@ lista = Lista()
 lista.LE_INSERIR("a", "b")
 lista.LE_INSERIR("b", "*")
 lista.LE_INSERIR("*", "c")
+lista.LE_INSERIR("a", "d")
 
 lista.vertices[0].tipo = "entrada"
-lista.vertices[3].tipo = "saida"
+lista.vertices[4].tipo = "saida"
 
 grafo = graph(lista)
-grafo.BuscaLargura()
+grafo.DistanciaEntradaSaida()
 
 
 
